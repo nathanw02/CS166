@@ -465,6 +465,37 @@ public class Amazon {
     }
 
     public static void viewProducts(Amazon esql) {
+        System.out.print("Enter store ID: ");
+        
+        int id;
+
+        try {
+            id = Integer.parseInt(in.readLine());
+        } catch (Exception e) {
+            System.out.println("Your input is invalid!");
+            return;
+        }
+
+        try {
+            String query = String.format("SELECT productName, numberOfUnits, pricePerUnit FROM Product WHERE storeID = '%s'", id);
+
+            List<List<String>> results = esql.executeQueryAndReturnResult(query);
+            
+            System.out.println("List of items in Store " + id);
+            System.out.println("---------");
+            for (List<String> record : results) {
+                String name = record.get(0);
+                int num = Integer.parseInt(record.get(1));
+                double price = Float.parseFloat(record.get(2));
+                System.out.println("Item: " + name);
+                System.out.println("Units available: " + num);
+                System.out.println("Price: " + price);
+                System.out.println("---------");
+                    
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     public static void placeOrder(Amazon esql) {
