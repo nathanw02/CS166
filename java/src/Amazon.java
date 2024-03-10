@@ -317,7 +317,7 @@ public class Amazon {
                                 placeOrder(esql, userID);
                                 break;
                             case 4:
-                                viewRecentOrders(esql);
+                                viewRecentOrders(esql, userID);
                                 break;
                             case 5:
                                 updateProduct(esql);
@@ -576,7 +576,33 @@ public class Amazon {
         }
     }
 
-    public static void viewRecentOrders(Amazon esql) {
+    public static void viewRecentOrders(Amazon esql, String userID) {
+        try {
+            String query = String.format("SELECT storeID, productName, unitsOrdered, orderTime FROM Orders WHERE customerID = '%s' ORDER BY orderTime DESC LIMIT 5", userID);
+            
+            List<List<String>> results = esql.executeQueryAndReturnResult(query);
+            
+            System.out.println("\nRecent Orders");
+            System.out.println("---------");
+            for (List<String> record : results) {
+                int storeID = Integer.parseInt(record.get(0));
+                String productName = record.get(1);
+                int unitsOrdered = Integer.parseInt(record.get(2));
+                String date = record.get(3);
+
+                System.out.println("Store ID: " + storeID);
+                System.out.println("Product name: " + productName);
+                System.out.println("Units ordered: " + unitsOrdered);
+                System.out.println("Date ordered: " + date);
+
+                System.out.println("---------");    
+            }
+
+            System.out.println();
+
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     public static void updateProduct(Amazon esql) {
