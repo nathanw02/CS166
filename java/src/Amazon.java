@@ -272,13 +272,13 @@ public class Amazon {
                 System.out.println("1. Create user");
                 System.out.println("2. Log in");
                 System.out.println("9. < EXIT");
-                String userID = null;
+                List<String> userInfo = null;
                 switch (readChoice()) {
                     case 1:
                         CreateUser(esql);
                         break;
                     case 2:
-                        userID = LogIn(esql);
+                        userInfo = LogIn(esql);
                         break;
                     case 9:
                         keepon = false;
@@ -287,7 +287,7 @@ public class Amazon {
                         System.out.println("Unrecognized choice!");
                         break;
                 }// end switch
-                if (userID != null) {
+                if (userInfo.size() != 0) {
                     boolean usermenu = true;
                     while (usermenu) {
                         System.out.println("MAIN MENU");
@@ -308,16 +308,16 @@ public class Amazon {
                         System.out.println("20. Log out");
                         switch (readChoice()) {
                             case 1:
-                                viewStores(esql, userID);
+                                viewStores(esql, userInfo.get(0));
                                 break;
                             case 2:
                                 viewProducts(esql);
                                 break;
                             case 3:
-                                placeOrder(esql, userID);
+                                placeOrder(esql, userInfo.get(0));
                                 break;
                             case 4:
-                                viewRecentOrders(esql, userID);
+                                viewRecentOrders(esql, userInfo.get(0));
                                 break;
                             case 5:
                                 updateProduct(esql);
@@ -419,19 +419,25 @@ public class Amazon {
     /*
      * Check log in credentials for an existing user
      * 
-     * @return User login or null is the user does not exist
+     * @return User ID and Type or null is the user does not exist
      **/
-    public static String LogIn(Amazon esql) {
+    public static List<String> LogIn(Amazon esql) {
         try {
             System.out.print("\tEnter name: ");
             String name = in.readLine();
             System.out.print("\tEnter password: ");
             String password = in.readLine();
 
-            String query = String.format("SELECT * FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
-            int userNum = Integer.parseInt(esql.executeQueryAndReturnResult(query).get(0).get(0));
-            if (userNum > 0)
-                return Integer.toString(userNum);
+            String query = String.format("SELECT userID, type FROM USERS WHERE name = '%s' AND password = '%s'", name, password);
+            List<List<String>> result = esql.executeQueryAndReturnResult(query);
+            
+            List<String> info = new ArrayList<>();
+            info.add(result.get(0).get(0));
+            info.add(result.get(0).get(1));
+
+            if (info.size() > 0)
+                return info;
+
             return null;
         } catch (Exception e) {
             System.err.println(e.getMessage());
