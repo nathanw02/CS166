@@ -329,7 +329,7 @@ public class Amazon {
                                 viewPopularProducts(esql);
                                 break;
                             case 8:
-                                viewPopularCustomers(esql);
+                                viewPopularCustomers(esql, userInfo.get(0), userInfo.get(1));
                                 break;
                             case 9:
                                 placeProductSupplyRequests(esql);
@@ -620,7 +620,55 @@ public class Amazon {
     public static void viewPopularProducts(Amazon esql) {
     }
 
-    public static void viewPopularCustomers(Amazon esql) {
+    public static void viewPopularCustomers(Amazon esql, String userID, String type) {
+        if (!type.trim().equals("manager")) {
+            System.out.println("Invalid permissions.\n");
+            return;
+        }
+
+        try {
+            String query = String.format("SELECT storeID from Store WHERE managerID = '%s'", userID);
+            List<List<String>> result = esql.executeQueryAndReturnResult(query);
+
+            if (result.size() == 0) {
+                System.out.println("You do not manage any stores.");
+                return;
+            }
+
+            System.out.println("Here are the stores you manage: ");
+            System.out.println("---------");  
+            for (List<String> record : result) {
+                System.out.println("Store ID: " + record.get(0));
+            }
+
+            System.out.println("---------\n");  
+            
+            System.out.print("Enter store ID to view popular customers: ");
+            String storeID = in.readLine();
+
+            String query2 = String.format("SELECT u.userID, u.name, COUNT(o.orderNumber) AS orderCount FROM Users u JOIN Orders o ON u.userID = o.customerID WHERE o.storeID = '%s' GROUP BY u.userID, u.name ORDER BY orderCount DESC LIMIT 5", storeID);
+            List<List<String>> result2 = esql.executeQueryAndReturnResult(query2);
+
+            System.out.println("\nMost popular customers at Store " + storeID);
+            System.out.println("---------");
+            for (List<String> record : result2) {
+                String customerID = record.get(0);
+                String name = record.get(1);
+                String orderCount = record.get(2);
+
+                System.out.println("Customer ID: " + customerID);
+                System.out.println("Name: " + name);
+                System.out.println("Order count: " + orderCount);
+
+                System.out.println("---------");    
+            }
+
+            System.out.println();
+
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+
     }
 
     public static void placeProductSupplyRequests(Amazon esql) {
