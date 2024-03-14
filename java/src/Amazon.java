@@ -303,6 +303,7 @@ public class Amazon {
                         System.out.println("7. View 5 Popular Items");
                         System.out.println("8. View 5 Popular Customers");
                         System.out.println("9. Place Product Supply Request to Warehouse");
+                        System.out.println("10. View All Orders");
 
                         System.out.println(".........................");
                         System.out.println("20. Log out");
@@ -334,7 +335,9 @@ public class Amazon {
                             case 9:
                                 placeProductSupplyRequests(esql, userInfo.get(0), userInfo.get(1));
                                 break;
-
+                            case 10:
+                                viewAllOrders(esql, userInfo.get(0), userInfo.get(1));
+                                break;
                             case 20:
                                 usermenu = false;
                                 break;
@@ -609,6 +612,47 @@ public class Amazon {
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
+    }
+
+    public static void viewAllOrders(Amazon esql, String userID, String type) {
+        if (!type.trim().equals("manager")) {
+            System.out.println("Invalid permissions.\n");
+            return;
+        }
+
+        try {
+            String query = String.format("SELECT o.orderNumber, u.name, o.storeID, o.productName, o.orderTime FROM Orders o JOIN Users u on o.customerID = u.userID JOIN Store s on o.storeID = s.storeID WHERE managerID = '%s'", userID);
+            List<List<String>> result = esql.executeQueryAndReturnResult(query);
+
+            if (result.size() == 0) {
+                System.out.println("You do not manage any stores.");
+                return;
+            }
+
+            System.out.println("Here are the orders from all the stores you manage: ");
+            System.out.println("---------");  
+            for (List<String> record : result) {
+                String orderID = record.get(0);
+                String name = record.get(1);
+                String storeID = record.get(2);
+                String productName = record.get(3);
+                String date = record.get(4);
+
+                System.out.println("Order ID: " + orderID);
+                System.out.println("Name: " + name);
+                System.out.println("Store ID: " + storeID);
+                System.out.println("Product name: " + productName);
+                System.out.println("Date ordered: " + date);
+
+                System.out.println("---------");    
+            }
+
+            System.out.println();  
+            
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+
     }
 
     public static void updateProduct(Amazon esql, String userID,  String type) {
